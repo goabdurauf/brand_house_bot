@@ -35,7 +35,7 @@ public class TelegramBotApplication {
         ctx.setState(message.from.id, "name");
     }
 
-    @MessageHandler(texts = {"ID", "Username", "Language"})
+    @MessageHandler(texts = {"ID", "Username", "Language", "test"})
     void text(BotContext context, Message message){
         var user = message.from;
         String response;
@@ -56,6 +56,9 @@ public class TelegramBotApplication {
             case "Language":
                 String language = (user.language_code != null) ? user.language_code : "not specified";
                 response = String.format("<b>Your language code is:</b> %s", language);
+                break;
+            case "test":
+                response = "hello world";
                 break;
 
             default:
