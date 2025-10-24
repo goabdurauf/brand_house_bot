@@ -64,6 +64,29 @@ public class TelegramBotApplication {
                 .exec();
     }
 
+    @MessageHandler(texts = {"LEPKA_RU", "DIZAY_RU"})
+    void text1(BotContext context, Message message){
+        var user = message.from;
+        String response;
+        var keyboard = new ReplyKeyboardMarkup().resizeKeyboard(true);
+
+        switch (message.text) {
+            case "LEPKA_RU":
+                keyboard.add("taro", "molding");
+                break;
+
+            case "DIZAY_RU":
+                keyboard.add("taro", "molding");
+                break;
+            default:
+                response = "Unknown option selected.";
+        }
+
+        context.sendMessage(message.chat.id, "OPTIONLAR")
+                .replyMarkup(keyboard) // Attach the keyboard to the message
+                .exec();
+    }
+
 
 //    @MessageHandler(type = MessageType.TEXT, priority = 1)
 //    void echo(BotContext context, Message message){
