@@ -49,7 +49,7 @@ public class TelegramBotApplication {
 
         switch (message.text) {
             case "UZB":
-                keyboard.add("LEPKA", "DIZAY");
+                keyboard.add("LEPKA", "DIZAY_1");
                 break;
 
             case "RUS":
