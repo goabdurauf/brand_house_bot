@@ -20,7 +20,7 @@ import java.util.*;
 public class TelegramBotApplication {
 
     public static String getBotToken() {
-        return "1993250215:AAGMycwA0JRqXh5wp3zIeby8Qe3IJuhc-eY";
+        return "";
     }
     public static void main(String[] args) {
         SpringApplication.run(TelegramBotApplication.class, args);
