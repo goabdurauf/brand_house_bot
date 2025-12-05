@@ -4,24 +4,17 @@ import io.github.natanimn.telebof.BotClient;
 import io.github.natanimn.telebof.BotContext;
 import io.github.natanimn.telebof.annotations.CallbackHandler;
 import io.github.natanimn.telebof.annotations.MessageHandler;
-import io.github.natanimn.telebof.enums.MessageType;
-import io.github.natanimn.telebof.enums.ParseMode;
 import io.github.natanimn.telebof.types.keyboard.InlineKeyboardButton;
 import io.github.natanimn.telebof.types.keyboard.InlineKeyboardMarkup;
-import io.github.natanimn.telebof.types.keyboard.KeyboardButton;
 import io.github.natanimn.telebof.types.keyboard.ReplyKeyboardMarkup;
 import io.github.natanimn.telebof.types.updates.Message;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
-
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
 
 @SpringBootApplication
 public class TelegramBotApplication {
@@ -49,7 +42,8 @@ public class TelegramBotApplication {
                 "Lepka", "Dizayn"  // Display without slash
         );
 
-        context.sendMessage(message.chat.id, "Welcome! Please choose an option:")
+        context.sendMessage(
+                message.chat.id, "Assalomu Allaykum BREND HOUSE rasmiy Telegram botiga xush kelibsiz! Quydagi tugmalardan birini bosing")
                 .replyMarkup(keyboard)
                 .exec();
     }
@@ -64,7 +58,7 @@ public class TelegramBotApplication {
                     "orqaga"
             );
             // SEND THE MESSAGE WITH THE KEYBOARD
-            context.sendMessage(message.chat.id, "Choose one:")
+            context.sendMessage(message.chat.id, "Birini tanlang:")
                     .replyMarkup(keyboard)
                     .exec();
     }
@@ -93,6 +87,32 @@ public class TelegramBotApplication {
 
         sendPage(context, chatId);
     }
+
+    @MessageHandler(texts = {"Bort"})
+    void bort(BotContext context, Message message) {
+
+        long chatId = message.chat.id;
+
+        List<File> images = getBortImages();
+        userImages.put(chatId, images);
+        userPage.put(chatId, 0);
+
+        sendPage(context, chatId);
+    }
+
+    @MessageHandler(texts = {"Dekor"})
+    void dekor(BotContext context, Message message) {
+
+        long chatId = message.chat.id;
+
+        List<File> images = getDekorImages();
+        userImages.put(chatId, images);
+        userPage.put(chatId, 0);
+
+        sendPage(context, chatId);
+    }
+
+
 
     // Send a page of images
     void sendPage(BotContext context, long chatId) {
@@ -124,20 +144,6 @@ public class TelegramBotApplication {
         }
     }
 
-    @MessageHandler(texts = {"Bort",})
-    void bort(BotContext context, Message message) {
-        String response;
-        var keyboard = new ReplyKeyboardMarkup().resizeKeyboard(true);
-        context.sendMessage(message.chat.id, "You said: " + message.text).exec();
-    }
-
-    @MessageHandler(texts = {"Dekor",})
-    void dekor(BotContext context, Message message) {
-        String response;
-        var keyboard = new ReplyKeyboardMarkup().resizeKeyboard(true);
-        context.sendMessage(message.chat.id, "You said: " + message.text).exec();
-    }
-
     @MessageHandler(texts = {"orqaga",})
     void orqaga(BotContext context, Message message) {
         var keyboard = new ReplyKeyboardMarkup().resizeKeyboard(true);
@@ -145,7 +151,7 @@ public class TelegramBotApplication {
                 "Lepka", "Dizayn"  // Display without slash
         );
         // SEND THE MESSAGE WITH THE KEYBOARD
-        context.sendMessage(message.chat.id, "Choose one:")
+        context.sendMessage(message.chat.id, "Birini tanlang:")
                 .replyMarkup(keyboard)
                 .exec();
     }
@@ -160,7 +166,7 @@ public class TelegramBotApplication {
             for (var r : resources) {
                 files.add(r.getFile());
             }
-
+            sortByCreationDate(files);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -179,12 +185,54 @@ public class TelegramBotApplication {
                 files.add(r.getFile());
             }
 
+            sortByCreationDate(files);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return files;
     }
+
+    public List<File> getBortImages() {
+        List<File> files = new ArrayList<>();
+
+        try {
+            var resolver = new PathMatchingResourcePatternResolver();
+            var resources = resolver.getResources("classpath:/static/image/bort/*");
+
+            for (var r : resources) {
+                files.add(r.getFile());
+            }
+            sortByCreationDate(files);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return files;
+    }
+
+
+    public List<File> getDekorImages() {
+        List<File> files = new ArrayList<>();
+
+        try {
+            var resolver = new PathMatchingResourcePatternResolver();
+            var resources = resolver.getResources("classpath:/static/image/dekor/*");
+
+            for (var r : resources) {
+                files.add(r.getFile());
+            }
+            sortByCreationDate(files);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return files;
+    }
+
+
 
     @CallbackHandler
     void onCallback(BotContext context, io.github.natanimn.telebof.types.updates.CallbackQuery query) {
@@ -197,6 +245,24 @@ public class TelegramBotApplication {
             userPage.put(chatId, page + 1);
             sendPage(context, chatId);
         }
+    }
+
+    public static void sortByCreationDate(List<File> files) {
+        files.sort(new Comparator<File>() {
+            @Override
+            public int compare(File f1, File f2) {
+                try {
+                    BasicFileAttributes attr1 = Files.readAttributes(f1.toPath(), BasicFileAttributes.class);
+                    BasicFileAttributes attr2 = Files.readAttributes(f2.toPath(), BasicFileAttributes.class);
+
+                    // Newest first (DESCENDING)
+                    return attr2.creationTime().compareTo(attr1.creationTime());
+
+                } catch (Exception e) {
+                    return 0;
+                }
+            }
+        });
     }
 
 
